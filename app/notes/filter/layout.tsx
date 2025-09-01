@@ -1,12 +1,11 @@
-import type { ReactNode } from "react";
 import css from "./NotesFilterLayout.module.css";
 
 export default function NotesFilterLayout({
   children,
   sidebar,
 }: {
-  children: ReactNode;
-  sidebar: ReactNode;
+  children: React.ReactNode;
+  sidebar: React.ReactNode;
 }) {
   return (
     <div className={css.layout}>

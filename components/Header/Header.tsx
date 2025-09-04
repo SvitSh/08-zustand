@@ -1,6 +1,6 @@
-import Link from 'next/link';
-import css from './Header.module.css';
-import TagsMenu from '../TagsMenu/TagsMenu';
+import Link from "next/link";
+import css from "./Header.module.css";
+import TagsMenu from "../TagsMenu/TagsMenu";
 
 /**
  * Primary navigation component displayed at the top of every page.  Uses

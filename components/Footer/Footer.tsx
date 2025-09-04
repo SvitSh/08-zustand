@@ -1,4 +1,4 @@
-import css from './Footer.module.css';
+import css from "./Footer.module.css";
 
 /**
  * Application footer.  Displays a copyright notice along with developer
@@ -8,13 +8,11 @@ import css from './Footer.module.css';
 export default function Footer() {
   return (
     <footer className={css.footer}>
-      <p>
-        © {new Date().getFullYear()} NoteHub. All rights reserved.
-      </p>
+      <p>© {new Date().getFullYear()} NoteHub. All rights reserved.</p>
       <div className={css.wrap}>
         <p>Developer: Your Name</p>
         <p>
-          Contact us:{' '}
+          Contact us:{" "}
           <a href="mailto:student@notehub.app">student@notehub.app</a>
         </p>
       </div>

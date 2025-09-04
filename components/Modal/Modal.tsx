@@ -1,8 +1,8 @@
 "use client";
 
-import { useEffect } from 'react';
-import { createPortal } from 'react-dom';
-import css from './Modal.module.css';
+import { useEffect } from "react";
+import { createPortal } from "react-dom";
+import css from "./Modal.module.css";
 
 interface ModalProps {
   /** Callback invoked when the modal should be closed */
@@ -22,19 +22,20 @@ export default function Modal({ onClose, children }: ModalProps) {
   // Ensure the modal is closed when the escape key is pressed
   useEffect(() => {
     const onEsc = (e: KeyboardEvent) => {
-      if (e.key === 'Escape') onClose();
+      if (e.key === "Escape") onClose();
     };
-    window.addEventListener('keydown', onEsc);
-    return () => window.removeEventListener('keydown', onEsc);
+    window.addEventListener("keydown", onEsc);
+    return () => window.removeEventListener("keydown", onEsc);
   }, [onClose]);
 
   const onBackdrop = (e: React.MouseEvent<HTMLDivElement>) => {
     if (e.target === e.currentTarget) onClose();
   };
 
-  const modalRoot = typeof document !== 'undefined'
-    ? (document.getElementById('modal-root') as HTMLElement)
-    : null;
+  const modalRoot =
+    typeof document !== "undefined"
+      ? (document.getElementById("modal-root") as HTMLElement)
+      : null;
 
   if (!modalRoot) return null;
 

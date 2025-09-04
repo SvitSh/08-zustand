@@ -1,12 +1,12 @@
-import axios from 'axios';
-import type { Note, NoteTag } from '../types/note';
+import axios from "axios";
+import type { Note, NoteTag } from "../types/note";
 
 /**
  * Default base URL for the backend API.  Used when no environment
  * variable is provided.  Keeping a sensible fallback ensures that the
  * application can still function locally even if `.env.local` is mis‑configured.
  */
-const DEFAULT_API_URL = 'https://notehub-public.goit.study/api';
+const DEFAULT_API_URL = "https://notehub-public.goit.study/api";
 
 /**
  * Base URL of the backend API.  Sourced from the `NEXT_PUBLIC_API_URL`
@@ -44,7 +44,7 @@ export interface FetchNotesParams {
   perPage: number;
   search?: string;
   tag?: NoteTag;
-  sortBy?: 'created' | 'updated';
+  sortBy?: "created" | "updated";
 }
 
 /**

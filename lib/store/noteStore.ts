@@ -1,8 +1,8 @@
-'use client';
+"use client";
 
-import { create } from 'zustand';
-import { persist } from 'zustand/middleware';
-import type { NoteTag } from '@/types/note';
+import { create } from "zustand";
+import { persist } from "zustand/middleware";
+import type { NoteTag } from "@/types/note";
 
 export type Draft = {
   title: string;
@@ -11,9 +11,9 @@ export type Draft = {
 };
 
 export const initialDraft: Draft = {
-  title: '',
-  content: '',
-  tag: 'Todo',
+  title: "",
+  content: "",
+  tag: "Todo",
 };
 
 type NoteStore = {
@@ -31,7 +31,7 @@ export const useNoteStore = create<NoteStore>()(
       clearDraft: () => set({ draft: initialDraft }),
     }),
     {
-      name: 'notehub-draft', // key in localStorage
+      name: "notehub-draft", // key in localStorage
       partialize: (state) => ({ draft: state.draft }),
     }
   )

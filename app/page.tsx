@@ -1,4 +1,4 @@
-import css from './Home.module.css';
+import css from "./Home.module.css";
 
 /**
  * Home page of the application.  Provides a brief introduction to NoteHub

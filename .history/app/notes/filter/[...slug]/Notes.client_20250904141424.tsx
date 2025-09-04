@@ -3,7 +3,7 @@
 import { useState, useEffect } from "react";
 import Link from "next/link";
 import { usePathname, useSearchParams } from "next/navigation";
-import { useQuery, keepPreviousData } from "@tanstack/react-query";
+import { useQuery } from "@tanstack/react-query";
 import { useDebounce } from "use-debounce";
 import css from "./NotesPage.module.css";
 
@@ -18,11 +18,12 @@ import type { NoteTag } from "@/types/note";
 const PER_PAGE = 12;
 
 type Props = {
-  /** из SSR-страницы передаём 'All' или конкретный тег */
-  tag: NoteTag | "All";
+  params: { slug?: string[] };
+  searchParams?: { q?: string; page?: string };
 };
 
-export default function NotesClient({ tag }: Props) {
+export default function NotesClient({ params, searchParams }: Props) {
+  // ✅ Хуки строго внутри компонента
   const pathname = usePathname();
   const sp = useSearchParams();
 
@@ -32,14 +33,14 @@ export default function NotesClient({ tag }: Props) {
     if (sp?.get("created") === "1") clearDraft();
   }, [sp, clearDraft]);
 
-  // Поиск с дебаунсом
-  const [search, setSearch] = useState("");
+  const tagFromUrl = params?.slug?.[0] ?? "All";
+  const tag: NoteTag | "All" = (tagFromUrl as any) || "All";
+
+  const initialSearch = searchParams?.q ?? "";
+  const [search, setSearch] = useState(initialSearch);
   const [debouncedSearch] = useDebounce(search, 400);
 
-  // Локальная пагинация (страницу не пишем в URL)
-  const [page, setPage] = useState(1);
-
-  // Приводим тег к типу API: undefined = все
+  const page = Math.max(1, Number(searchParams?.page ?? "1"));
   const effectiveTag: NoteTag | undefined =
     tag === "All" ? undefined : (tag as NoteTag);
 
@@ -52,17 +53,16 @@ export default function NotesClient({ tag }: Props) {
         search: debouncedSearch,
         tag: effectiveTag,
       }),
-    // v5: вместо keepPreviousData: true — placeholderData: keepPreviousData
-    placeholderData: keepPreviousData,
+    keepPreviousData: true,
   });
 
-  const pageCount = data?.totalPages ?? 1;
+  const totalPages = data ? Math.max(1, Math.ceil(data.total / PER_PAGE)) : 1;
 
   return (
     <div className={css.wrapper}>
       <header className={css.header}>
-        {/* ✅ SearchBox ждёт onSearch, не onChange */}
-        <SearchBox value={search} onSearch={setSearch} />
+        <SearchBox value={search} onChange={setSearch} />
+        {/* Передаём from, чтобы по Save вернуться обратно */}
         <Link
           className={css.btn}
           href={`/notes/action/create?from=${encodeURIComponent(
@@ -75,16 +75,14 @@ export default function NotesClient({ tag }: Props) {
 
       {isLoading && <p>Loading, please wait...</p>}
       {isError && <p>Could not fetch the list of notes.</p>}
-
-      {/* ✅ NoteList ждёт props.notes */}
       {data && data.notes.length > 0 && <NoteList notes={data.notes} />}
 
-      {/* ✅ Pagination: currentPage/pageCount/onPageChange */}
-      {pageCount > 1 && (
+      {data && data.notes.length > 0 && (
         <Pagination
-          currentPage={page}
-          pageCount={pageCount}
-          onPageChange={(newPage) => setPage(newPage)}
+          page={page}
+          totalPages={totalPages}
+          basePath={`/notes/filter/${tag}`}
+          q={debouncedSearch}
         />
       )}
     </div>

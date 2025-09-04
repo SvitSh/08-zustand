@@ -1,97 +1,75 @@
-'use client';
+"use client";
 
-import { useState, ChangeEvent, FormEvent } from 'react';
-import { useRouter } from 'next/navigation';
-import css from './NoteForm.module.css';
-import { createNote } from '@/lib/api';
-import type { NoteTag } from '@/types/note';
-import { useNoteStore, initialDraft } from '@/lib/store/noteStore';
+import { useSearchParams, usePathname } from "next/navigation";
+import css from "./NoteForm.module.css";
+import type { NoteTag } from "@/types/note";
+import { useNoteStore } from "@/lib/store/noteStore";
+import { createNoteAction } from "@/app/notes/action/create/actions";
 
-const TAGS: NoteTag[] = ['Important', 'Todo', 'Later'];
+const TAGS: NoteTag[] = ["Important", "Todo", "Later"];
 
 export default function NoteForm() {
-  const router = useRouter();
-  const { draft, setDraft, clearDraft } = useNoteStore();
-  const [isSubmitting, setIsSubmitting] = useState(false);
-  const [error, setError] = useState<string | null>(null);
+  const params = useSearchParams();
+  const pathname = usePathname();
+  const from = params.get("from") || pathname || "/notes/filter/All";
 
-  const handleChange = (e: ChangeEvent<HTMLInputElement | HTMLTextAreaElement | HTMLSelectElement>) => {
-    const { name, value } = e.target as { name: string; value: string };
-    if (name === 'title' || name === 'content' || name === 'tag') {
-      setDraft({ [name]: value } as any);
-    }
-  };
-
-  async function handleSubmit(e: FormEvent<HTMLFormElement>) {
-    e.preventDefault();
-    setIsSubmitting(true);
-    setError(null);
-    try {
-      await createNote({
-        title: draft.title.trim(),
-        content: draft.content.trim(),
-        tag: draft.tag,
-      });
-      clearDraft();
-      router.back();
-    } catch (err: any) {
-      setError('Failed to create note.');
-      setIsSubmitting(false);
-    }
-  }
+  const draft = useNoteStore((s) => s.draft);
+  const setDraft = useNoteStore((s) => s.setDraft);
 
   return (
-    <form className={css.form} onSubmit={handleSubmit}>
-      <div className={css.field}>
-        <label htmlFor="title">Title</label>
+    <form className={css.form}>
+      <input type="hidden" name="from" value={from} />
+      <label className={css.label}>
+        <span>Title</span>
         <input
-          id="title"
+          className={css.input}
           name="title"
-          type="text"
           value={draft.title}
-          onChange={handleChange}
-          placeholder="Enter a note title"
-          required
+          onChange={(e) => setDraft({ title: e.target.value })}
+          placeholder="Enter title"
         />
-      </div>
+      </label>
 
-      <div className={css.field}>
-        <label htmlFor="content">Content</label>
+      <label className={css.label}>
+        <span>Content</span>
         <textarea
-          id="content"
+          className={css.textarea}
           name="content"
-          rows={6}
           value={draft.content}
-          onChange={handleChange}
+          onChange={(e) => setDraft({ content: e.target.value })}
           placeholder="Write your note..."
-          required
+          rows={8}
         />
-      </div>
+      </label>
 
-      <div className={css.field}>
-        <label htmlFor="tag">Tag</label>
-        <select id="tag" name="tag" value={draft.tag} onChange={handleChange}>
+      <label className={css.label}>
+        <span>Tag</span>
+        <select
+          className={css.select}
+          name="tag"
+          value={draft.tag}
+          onChange={(e) => setDraft({ tag: e.target.value as NoteTag })}
+        >
           {TAGS.map((t) => (
             <option key={t} value={t}>
               {t}
             </option>
           ))}
         </select>
-      </div>
-
-      {error && <p className={css.error}>{error}</p>}
+      </label>
 
       <div className={css.actions}>
+        <button className={css.primary} formAction={createNoteAction}>
+          Save
+        </button>
         <button
+          className={css.secondary}
           type="button"
-          className={css.cancelBtn}
-          onClick={() => router.back()}
-          disabled={isSubmitting}
+          onClick={() => {
+            if (typeof window !== "undefined") window.history.back();
+          }}
         >
           Cancel
-        </button>
-        <button type="submit" className={css.submitBtn} disabled={isSubmitting}>
-          {isSubmitting ? 'Creating…' : 'Create note'}
         </button>
       </div>
     </form>

@@ -1,8 +1,8 @@
 "use client";
 
-import { useState } from 'react';
-import Link from 'next/link';
-import css from './TagsMenu.module.css';
+import { useState } from "react";
+import Link from "next/link";
+import css from "./TagsMenu.module.css";
 
 /**
  * List of available tags for filtering notes.  Includes a special
@@ -10,12 +10,12 @@ import css from './TagsMenu.module.css';
  * this array if you add new tags to the backend API.
  */
 const TAGS = [
-  { label: 'All notes', value: 'All' },
-  { label: 'Todo', value: 'Todo' },
-  { label: 'Work', value: 'Work' },
-  { label: 'Personal', value: 'Personal' },
-  { label: 'Meeting', value: 'Meeting' },
-  { label: 'Shopping', value: 'Shopping' },
+  { label: "All notes", value: "All" },
+  { label: "Todo", value: "Todo" },
+  { label: "Work", value: "Work" },
+  { label: "Personal", value: "Personal" },
+  { label: "Meeting", value: "Meeting" },
+  { label: "Shopping", value: "Shopping" },
 ];
 
 /**

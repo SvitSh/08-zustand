@@ -1,7 +1,10 @@
-
-export async function generateMetadata({ params }: { params: Promise<{ slug: string[] }> }) {
+export async function generateMetadata({
+  params,
+}: {
+  params: Promise<{ slug: string[] }>;
+}) {
   const { slug } = await params;
-  const tag = Array.isArray(slug) && slug.length > 0 ? slug[0] : 'All';
+  const tag = Array.isArray(slug) && slug.length > 0 ? slug[0] : "All";
   const title = `Notes — ${tag}`;
   const description = `Browse notes filtered by tag: ${tag}.`;
   return {
@@ -11,9 +14,9 @@ export async function generateMetadata({ params }: { params: Promise<{ slug: str
       title,
       description,
       url: `https://notehub.app/notes/filter/${tag}`,
-      images: ['/notehub-og-meta.jpg'],
-      type: 'website',
-    }
+      images: ["/notehub-og-meta.jpg"],
+      type: "website",
+    },
   };
 }
 

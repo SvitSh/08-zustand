@@ -1,9 +1,9 @@
 "use client";
 
-import { useParams } from 'next/navigation';
-import { useQuery } from '@tanstack/react-query';
-import { fetchNoteById } from '@/lib/api';
-import css from './NoteDetails.module.css';
+import { useParams } from "next/navigation";
+import { useQuery } from "@tanstack/react-query";
+import { fetchNoteById } from "@/lib/api";
+import css from "./NoteDetails.module.css";
 
 /**
  * Client component responsible for displaying the details of a single note.
@@ -19,7 +19,7 @@ export default function NoteDetailsClient() {
     isLoading,
     error,
   } = useQuery({
-    queryKey: ['note', id],
+    queryKey: ["note", id],
     queryFn: () => fetchNoteById(id),
     enabled: !!id,
     refetchOnMount: false,
@@ -38,11 +38,11 @@ export default function NoteDetailsClient() {
         <p className={css.tag}>{note.tag}</p>
         <p className={css.date}>
           {new Date(note.createdAt).toLocaleDateString(undefined, {
-            year: 'numeric',
-            month: 'long',
-            day: 'numeric',
-            hour: '2-digit',
-            minute: '2-digit',
+            year: "numeric",
+            month: "long",
+            day: "numeric",
+            hour: "2-digit",
+            minute: "2-digit",
           })}
         </p>
       </div>

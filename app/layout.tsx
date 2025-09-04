@@ -6,17 +6,24 @@ import TanStackProvider from "@/components/TanStackProvider/TanStackProvider";
 import type { Metadata } from "next";
 import { Roboto } from "next/font/google";
 
-const roboto = Roboto({ weight: ['400','500','700'], subsets: ['latin'], display: 'swap' });
+const roboto = Roboto({
+  weight: ["400", "500", "700"],
+  variable: "--font-roboto",
+  subsets: ["latin", "cyrillic"],
+  display: "swap",
+});
 
 export const metadata: Metadata = {
-  title: 'NoteHub',
-  description: 'A simple and efficient application for managing personal notes.',
+  title: "NoteHub",
+  description:
+    "A simple and efficient application for managing personal notes.",
   openGraph: {
-    title: 'NoteHub',
-    description: 'A simple and efficient application for managing personal notes.',
-    url: 'https://notehub.app',
-    images: ['/notehub-og-meta.jpg'],
-    type: 'website',
+    title: "NoteHub",
+    description:
+      "A simple and efficient application for managing personal notes.",
+    url: "https://notehub.app",
+    images: ["/notehub-og-meta.jpg"],
+    type: "website",
   },
 };
 
@@ -28,7 +35,7 @@ export default function RootLayout({
   modal: React.ReactNode;
 }) {
   return (
-    <html lang="en">
+    <html lang="en" className={roboto.variable}>
       <body className={roboto.className}>
         <TanStackProvider>
           <Header />

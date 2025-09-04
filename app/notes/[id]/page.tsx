@@ -1,10 +1,17 @@
-
-export async function generateMetadata({ params }: { params: Promise<{ id: string }> }) {
+export async function generateMetadata({
+  params,
+}: {
+  params: Promise<{ id: string }>;
+}) {
   const { id } = await params;
   try {
     const note = await fetchNoteById(id);
-    const title = note?.title ? `${note.title} — NoteHub` : 'Note details — NoteHub';
-    const description = note?.content ? note.content.slice(0, 140) : 'Note details page';
+    const title = note?.title
+      ? `${note.title} — NoteHub`
+      : "Note details — NoteHub";
+    const description = note?.content
+      ? note.content.slice(0, 140)
+      : "Note details page";
     return {
       title,
       description,
@@ -12,13 +19,13 @@ export async function generateMetadata({ params }: { params: Promise<{ id: strin
         title,
         description,
         url: `https://notehub.app/notes/${id}`,
-        images: ['/notehub-og-meta.jpg'],
-        type: 'article',
-      }
+        images: ["/notehub-og-meta.jpg"],
+        type: "article",
+      },
     };
   } catch {
-    const title = 'Note details — NoteHub';
-    const description = 'Note details page';
+    const title = "Note details — NoteHub";
+    const description = "Note details page";
     return {
       title,
       description,
@@ -26,17 +33,17 @@ export async function generateMetadata({ params }: { params: Promise<{ id: strin
         title,
         description,
         url: `https://notehub.app/notes/${id}`,
-        images: ['/notehub-og-meta.jpg'],
-        type: 'article',
-      }
+        images: ["/notehub-og-meta.jpg"],
+        type: "article",
+      },
     };
   }
 }
 
-import { HydrationBoundary, dehydrate } from '@tanstack/react-query';
-import getQueryClient from '@/lib/getQueryClient';
-import { fetchNoteById } from '@/lib/api';
-import NoteDetailsClient from './NoteDetails.client';
+import { HydrationBoundary, dehydrate } from "@tanstack/react-query";
+import getQueryClient from "@/lib/getQueryClient";
+import { fetchNoteById } from "@/lib/api";
+import NoteDetailsClient from "./NoteDetails.client";
 
 interface NoteDetailsPageProps {
   params: { id: string };
@@ -48,7 +55,9 @@ interface NoteDetailsPageProps {
  * that the NoteDetailsClient component can render immediately without a
  * network request.
  */
-export default async function NoteDetailsPage({ params }: NoteDetailsPageProps) {
+export default async function NoteDetailsPage({
+  params,
+}: NoteDetailsPageProps) {
   const queryClient = getQueryClient();
   const id = params.id;
   // Prefetch the note if an ID is provided.  Even though IDs are
@@ -56,7 +65,7 @@ export default async function NoteDetailsPage({ params }: NoteDetailsPageProps) 
   // when id is falsy prevents unnecessary network calls.
   if (id) {
     await queryClient.prefetchQuery({
-      queryKey: ['note', id],
+      queryKey: ["note", id],
       queryFn: () => fetchNoteById(id),
     });
   }

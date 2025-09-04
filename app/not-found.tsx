@@ -1,24 +1,25 @@
+import type { Metadata } from "next";
 import css from "./NotFound.module.css";
 
-export const metadata = {
-  title: "404 — Page not found | NoteHub",
-  description: "Sorry, the page you are looking for does not exist.",
+export const metadata: Metadata = {
+  title: "404 — Страница не найдена | NoteHub",
+  description: "Такой страницы не существует.",
   openGraph: {
-    title: "404 — Page not found | NoteHub",
-    description: "Sorry, the page you are looking for does not exist.",
-    url: "https://notehub.app/404",
+    title: "404 — Страница не найдена | NoteHub",
+    description: "Такой страницы не существует.",
+    url: "/not-found",
     images: ["/notehub-og-meta.jpg"],
-    type: "website",
   },
+  twitter: { card: "summary_large_image" },
 };
 
 export default function NotFound() {
   return (
-    <main>
-      <h1 className={css.title}>404 - Page not found</h1>
-      <p className={css.description}>
-        Sorry, the page you are looking for does not exist.
-      </p>
+    <main className={css.main}>
+      <div className={css.container}>
+        <h1 className={css.title}>404 - Страница не найдена</h1>
+        <p>Извините, страница, которую вы ищете, не существует.</p>
+      </div>
     </main>
   );
 }

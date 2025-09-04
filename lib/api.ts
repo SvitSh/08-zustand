@@ -1,135 +1,85 @@
 import axios from "axios";
-import type { Note, NoteTag } from "../types/note";
+import type { Note, NoteTag } from "@/types/note";
 
-/**
- * Default base URL for the backend API.  Used when no environment
- * variable is provided.  Keeping a sensible fallback ensures that the
- * application can still function locally even if `.env.local` is mis‑configured.
- */
-const DEFAULT_API_URL = "https://notehub-public.goit.study/api";
+const API_URL = (process.env.NEXT_PUBLIC_API_URL || "").trim();
+const TOKEN = (process.env.NEXT_PUBLIC_NOTEHUB_TOKEN || "").trim();
 
-/**
- * Base URL of the backend API.  Sourced from the `NEXT_PUBLIC_API_URL`
- * environment variable if defined, otherwise falls back to the default.
- */
-const BASE_URL = process.env.NEXT_PUBLIC_API_URL ?? DEFAULT_API_URL;
+const client = axios.create({
+  baseURL: API_URL,
+  headers: TOKEN ? { Authorization: "Bearer " + TOKEN } : undefined,
+});
 
-/**
- * Personal access token used for authorising requests to the NoteHub API.
- * Tokens **must** be prefixed with `NEXT_PUBLIC_` in Next.js so that they
- * become available on the client as well as the server.  Do not commit your
- * real token to version control.
- */
-const TOKEN = process.env.NEXT_PUBLIC_NOTEHUB_TOKEN;
+export interface FetchNotesOptions {
+  page?: number;
+  perPage?: number;
+  search?: string;
+  tag?: NoteTag | "All";
+}
 
-/**
- * Response shape returned when requesting a paginated list of notes.  The
- * backend returns an array of notes along with the total number of pages
- * available so that pagination controls can be rendered on the client.
- */
 export interface FetchNotesResponse {
-  /** The notes for the current page */
   notes: Note[];
-  /** Total number of pages available */
   totalPages: number;
 }
 
-/**
- * Parameters accepted when fetching a page of notes.  Optional fields are
- * omitted when undefined to prevent sending empty strings or null values to
- * the server which would otherwise produce validation errors.
- */
-export interface FetchNotesParams {
-  page: number;
-  perPage: number;
-  search?: string;
-  tag?: NoteTag;
-  sortBy?: "created" | "updated";
-}
+export const fetchNotes = async ({
+  page = 1,
+  perPage = 12,
+  search,
+  tag,
+}: FetchNotesOptions): Promise<FetchNotesResponse> => {
+  const params: Record<string, string | number> = { page, perPage };
+  if (search) params.search = search;
 
-/**
- * Fetch a paginated list of notes from the server.  Supports optional
- * filtering by search keyword, tag and sort field.  Only non-empty values
- * are included in the query string.
- */
-export const fetchNotes = async (
-  params: FetchNotesParams
-): Promise<FetchNotesResponse> => {
-  const { page, perPage, search, tag, sortBy } = params;
-  const query: Record<string, string | number> = { page, perPage };
-  if (search && search.trim().length > 0) {
-    query.search = search.trim();
+  // API валидирует tag, и наших "Important" / "Later" там нет.
+  // Безопасно передаём только "Todo"; для остальных просто не передаём tag.
+  if (tag === "Todo") {
+    params.tag = "Todo";
   }
-  if (tag) {
-    query.tag = tag;
-  }
-  if (sortBy) {
-    query.sortBy = sortBy;
-  }
-  const response = await axios.get<FetchNotesResponse>(`${BASE_URL}/notes`, {
-    headers: {
-      Authorization: `Bearer ${TOKEN}`,
-    },
-    params: query,
-  });
-  return response.data;
+
+  const { data } = await client.get("/notes", { params });
+  return data as FetchNotesResponse;
 };
 
-/**
- * Payload used when creating a new note.  The backend will assign the ID
- * and timestamps for the newly created note.
- */
-export interface CreateNotePayload {
+export const fetchNote = async (id: string): Promise<Note> => {
+  const { data } = await client.get("/notes/" + id);
+  return data as Note;
+};
+
+// Алиас для старых импортов
+export { fetchNote as fetchNoteById };
+
+export interface CreateNoteDto {
   title: string;
   content: string;
-  tag: NoteTag;
+  tag: NoteTag; // UI-тег
 }
 
-/**
- * Create a new note on the server.  Returns the newly created note as
- * returned from the API.
- */
-export const createNote = async (note: CreateNotePayload): Promise<Note> => {
-  const response = await axios.post<Note>(`${BASE_URL}/notes`, note, {
-    headers: {
-      Authorization: `Bearer ${TOKEN}`,
-    },
-  });
-  return response.data;
+// Любой не-"Todo" мапим в "Todo", чтобы пройти валидацию API.
+const mapUiTagToApi = (tag: NoteTag): "Todo" | "Work" | "Personal" | "Meeting" | "Shopping" => {
+  return tag === "Todo" ? "Todo" : "Todo";
 };
 
-/**
- * Delete a note by its identifier.  The API responds with the deleted note
- * which can be used to update client state.
- */
-/**
- * Delete a note by its identifier.  The API responds with the full note
- * object that was removed.  Accepting a string here avoids the need to
- * coerce route params into numbers.
- */
-export const deleteNote = async (id: string): Promise<Note> => {
-  const response = await axios.delete<Note>(`${BASE_URL}/notes/${id}`, {
-    headers: {
-      Authorization: `Bearer ${TOKEN}`,
-    },
-  });
-  return response.data;
+export const createNote = async (dto: CreateNoteDto): Promise<Note> => {
+  const title = (dto.title || "").trim();
+  const content = (dto.content || "").trim();
+  const apiTag = mapUiTagToApi(dto.tag);
+
+  try {
+    const { data } = await client.post(
+      "/notes",
+      { title, content, tag: apiTag },
+      { headers: { "Content-Type": "application/json" } }
+    );
+    return data as Note;
+  } catch (err: any) {
+    const msg =
+      err?.response?.data?.message ||
+      err?.message ||
+      "Failed to create note";
+    throw new Error(msg);
+  }
 };
 
-/**
- * Fetch a single note by its ID.  Useful for displaying note details on
- * dedicated pages.  Throws an error if the note does not exist.
- */
-/**
- * Fetch a single note by its identifier.  Accepts a string ID because
- * route parameters are received as strings.  Throws an error if the
- * note does not exist.
- */
-export const fetchNoteById = async (id: string): Promise<Note> => {
-  const response = await axios.get<Note>(`${BASE_URL}/notes/${id}`, {
-    headers: {
-      Authorization: `Bearer ${TOKEN}`,
-    },
-  });
-  return response.data;
+export const deleteNote = async (id: string): Promise<void> => {
+  await client.delete("/notes/" + id);
 };

@@ -1,53 +1,36 @@
 "use client";
 
-import { useEffect } from "react";
+import { useEffect, useState } from "react";
 import { createPortal } from "react-dom";
 import css from "./Modal.module.css";
 
-interface ModalProps {
-  /** Callback invoked when the modal should be closed */
-  onClose: () => void;
-  /** Modal content to render */
+type Props = {
   children: React.ReactNode;
-}
+  onClose: () => void;
+};
 
 /**
- * A simple modal dialog implemented using React portals.  The modal listens
- * for the Escape key to allow keyboard dismissal and also closes when the
- * backdrop is clicked.  A `div` with an id of `modal-root` must be present
- * in the document (added in the root layout) in order for this component
- * to render correctly.
+ * Рендерим в существующий <div id="modal-root" /> из app/layout.tsx.
+ * Никаких manual removeChild — React сам разрулит размонтирование,
+ * что устраняет ошибку в StrictMode.
  */
-export default function Modal({ onClose, children }: ModalProps) {
-  // Ensure the modal is closed when the escape key is pressed
+export default function Modal({ children, onClose }: Props) {
+  const [root, setRoot] = useState<HTMLElement | null>(null);
+
   useEffect(() => {
-    const onEsc = (e: KeyboardEvent) => {
-      if (e.key === "Escape") onClose();
-    };
-    window.addEventListener("keydown", onEsc);
-    return () => window.removeEventListener("keydown", onEsc);
-  }, [onClose]);
+    if (typeof document !== "undefined") {
+      setRoot(document.getElementById("modal-root"));
+    }
+  }, []);
 
-  const onBackdrop = (e: React.MouseEvent<HTMLDivElement>) => {
-    if (e.target === e.currentTarget) onClose();
-  };
-
-  const modalRoot =
-    typeof document !== "undefined"
-      ? (document.getElementById("modal-root") as HTMLElement)
-      : null;
-
-  if (!modalRoot) return null;
+  if (!root) return null;
 
   return createPortal(
-    <div
-      className={css.backdrop}
-      role="dialog"
-      aria-modal="true"
-      onClick={onBackdrop}
-    >
-      <div className={css.modal}>{children}</div>
+    <div className={css.overlay} onClick={onClose}>
+      <div className={css.content} onClick={(e) => e.stopPropagation()}>
+        {children}
+      </div>
     </div>,
-    modalRoot
+    root
   );
 }

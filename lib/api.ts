@@ -55,7 +55,9 @@ export interface CreateNoteDto {
 }
 
 // Любой не-"Todo" мапим в "Todo", чтобы пройти валидацию API.
-const mapUiTagToApi = (tag: NoteTag): "Todo" | "Work" | "Personal" | "Meeting" | "Shopping" => {
+const mapUiTagToApi = (
+  tag: NoteTag
+): "Todo" | "Work" | "Personal" | "Meeting" | "Shopping" => {
   return tag === "Todo" ? "Todo" : "Todo";
 };
 
@@ -73,9 +75,7 @@ export const createNote = async (dto: CreateNoteDto): Promise<Note> => {
     return data as Note;
   } catch (err: any) {
     const msg =
-      err?.response?.data?.message ||
-      err?.message ||
-      "Failed to create note";
+      err?.response?.data?.message || err?.message || "Failed to create note";
     throw new Error(msg);
   }
 };
